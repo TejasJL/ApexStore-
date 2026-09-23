@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+
+# Production output
+dist/
+build/
+
+# Testing & Coverage
+coverage/
+
+# Logs & Dumps
+*.log
+*.stackdump
+
+# Environment variables
+.env*
+!.env.example
+
+# OS generated files
+.DS_Store
+Thumbs.db
