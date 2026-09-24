@@ -15,7 +15,7 @@ Designed and engineered with strict adherence to zero-third-party query/table/pa
 ## 🔗 Submission Links
 
 - **GitHub Repository**: [https://github.com/TejasJL/ApexStore-.git](https://github.com/TejasJL/ApexStore-.git)
-- **Live Demo Deployment**: [Deployed on Vercel]
+- **Live Demo Deployment**: [apexstore-phi.vercel.app](apexstore-phi.vercel.app)
 - **API Documentation**: [DummyJSON Docs](https://dummyjson.com/docs)
 
 ---
@@ -57,7 +57,7 @@ In accordance with assignment transparency guidelines, AI was utilized as an eng
 ```bash
 # 1. Clone the repository
 git clone https://github.com/TejasJL/ApexStore-.git
-cd ApexStore-
+
 
 # 2. Install project dependencies
 npm install
@@ -164,36 +164,3 @@ npm run preview
 ```
 
 ---
-
-## 🚀 Deployment Instructions
-
-### Vercel Deployment
-1. Import the repository into [Vercel](https://vercel.com).
-2. Framework Preset: **Vite** (automatically detected).
-3. Root Directory: `./`
-4. Build Command: `npm run build`
-5. Output Directory: `dist`
-6. Environment Variables:
-   - `VITE_API_BASE_URL`: `https://dummyjson.com`
-7. Click **Deploy**.
-
-*Note: The included `vercel.json` ensures that deep-linked routes such as `/products/1` will reload cleanly without returning a 404.*
-
-### Netlify Deployment
-1. Import the repository into [Netlify](https://www.netlify.com).
-2. Build command: `npm run build`
-3. Publish directory: `dist`
-4. The included `public/_redirects` file (`/* /index.html 200`) ensures client-side routing on all routes.
-
----
-
-## 🛠️ Verification & Quality Assurance
-
-- **Code Quality**: `npm run lint` — **0 errors, 0 warnings**.
-- **Production Build**: `npm run build` — **Built in < 1 second**.
-- **Clean Workspace**: Free of extraneous dependencies, mock data leaks, temporary comments, or unneeded tooling scaffolding.
-
----
-
-## 📄 License
-This project is open-source and available under the [MIT License](LICENSE).
