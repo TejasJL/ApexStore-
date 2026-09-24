@@ -1,25 +1,71 @@
 # ApexStore — Product Admin Dashboard
 
-A production-grade, responsive product catalog and inventory management dashboard built with **React 19**, **Tailwind CSS v4**, and **Axios**, powered by the free [DummyJSON REST API](https://dummyjson.com).
+[![React](https://img.shields.io/badge/React-19.0-61DAFB?logo=react&logoColor=black)](https://react.dev/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4.3-38B2AC?logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+[![Axios](https://img.shields.io/badge/Axios-1.20-5A29E4?logo=axios&logoColor=white)](https://axios-http.com/)
+[![Vite](https://img.shields.io/badge/Vite-8.3-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
+A production-grade, highly responsive product catalog and inventory management admin dashboard built from first principles using **React 19**, **Tailwind CSS v4**, and **Axios**, powered by the free [DummyJSON REST API](https://dummyjson.com).
+
+Designed and engineered with strict adherence to zero-third-party query/table/pagination library constraints, resilient dual-shield race condition immunity, bidirectional URL state synchronization, and an authentic session persistence overlay.
 
 ---
 
-## ⚡ Quick Start & Setup Steps
+## 🔗 Submission Links
 
-Follow these simple steps to run the application locally:
+- **GitHub Repository**: [https://github.com/TejasJL/ApexStore-.git](https://github.com/TejasJL/ApexStore-.git)
+- **Live Demo Deployment**: [Deployed on Vercel]
+- **API Documentation**: [DummyJSON Docs](https://dummyjson.com/docs)
+
+---
+
+## 📑 Required Assignment Reflection
+
+### 1. Key Architectural Choices & Rationale
+- **Centralized Axios Architecture (`src/api/axios.js`)**: Rather than scattering raw fetch or Axios calls across UI components, a single shared Axios instance was created. It attaches the user's Bearer JWT authentication token to every outgoing request via a request interceptor, standardizes error responses, automatically handles 401 session expirations, and gracefully filters out aborted requests.
+- **Pure First-Principles Implementation (Zero Third-Party Query/Table Libraries)**: In strict compliance with the assignment rules forbidding React Query, SWR, TanStack Table, or pagination packages, all data synchronization, cache revalidation, debounce timers, table sorting, and pagination logic were authored directly using React 19 core hooks (`useState`, `useEffect`, `useRef`, `useCallback`, `useTransition`) and Context API.
+- **Hybrid Resolution for Category + Search Conflict**: DummyJSON does not support simultaneous search (`/products/search?q=`) and category filtering (`/products/category/:category`). When both criteria are active, our engine retrieves candidate items matching the search query and applies client-side category filtering and sorting. An in-app alert banner (`CategorySearchAlert`) transparently communicates this behavior to the user.
+- **Session Mutation Overlay (`ProductMutationContext.jsx`)**: Because DummyJSON is a read-only mock API that does not persist `POST`, `PUT`, or `DELETE` operations, a local `sessionStorage` mutation overlay was architected. Real HTTP requests are executed to verify status codes, and successful changes are seamlessly overlaid on top of API responses. Newly added items appear at the top of Page 1, updates reflect instantaneously across catalog and detail views, and deleted items are filtered out across all views.
+- **Bidirectional URL State Persistence**: All catalog parameters (`page`, `limit`, `q`, `category`, `sortBy`, `order`, `delay`) and routes (`/products/:id`) synchronize with the browser address bar via the History API. Bookmarking, refreshing, or sharing links restores the exact view, and corrupted or out-of-range parameters (`?page=abc`, `?page=999`) are defensively handled without crashing the page.
+
+### 2. Technical Challenge Faced & Resolution
+- **Challenge**: **Out-of-Order Race Conditions During Rapid Search Typing**.  
+  When typing quickly into a search field (e.g. typing "p" followed by "phone"), multiple asynchronous HTTP requests are dispatched in rapid succession. If the earlier request (for "p") experiences higher network latency than the later request (for "phone"), the older response can resolve last and overwrite newer results with stale data.
+- **Resolution**: We engineered a **Dual-Shield Defense System**:
+  1. **Network Abort Controller**: An `AbortController` signal is bound to every Axios request. On every new keystroke or filter change, any pending in-flight request is immediately canceled via `abortController.abort()`.
+  2. **Monotonic Sequence Counter (`requestIdRef`)**: To guard against edge cases where network caches or transport delays deliver aborted payloads, a monotonic counter tracks each issued request. When an asynchronous response resolves, the hook checks `if (currentRequestId !== requestIdRef.current) return;`. Stale responses are safely discarded.
+  3. **Simulated Delay Testing**: A dedicated header toggle allows injecting `&delay=2000` into DummyJSON requests to verify in real time that typing quickly never results in stale data overwriting fresh results.
+
+### 3. Where AI Assisted in Development
+In accordance with assignment transparency guidelines, AI was utilized as an engineering pair-programming assistant for:
+- **Pagination Boundary Mathematics**: Assisting in formalizing zero-defect mathematical formulas for dynamic pagination windowing, ellipsis placement, and defensive bounds clamping (`startItem = total === 0 ? 0 : Math.min(skip + 1, total)`).
+- **Architectural Validation of Race Condition Immunity**: Validating the dual-shield pattern combining standard DOM `AbortController` cancellation with React's `useRef` sequence counter to eliminate edge-case timing vulnerabilities.
+- **Accessible UI Scaffolding**: Accelerating boilerplate for WCAG-compliant modal dialogues (focus trapping, Escape key listeners, backdrop dismissal) and responsive Tailwind CSS layout switching between desktop tables and mobile card grids.
+- **Edge-Case Brainstorming**: Identifying critical edge cases such as malformed query strings (`?page=abc`, `?page=999`), rapid multi-click submission prevention, and Single-Page Application (SPA) route reloading on static hosts.
+
+---
+
+## ⚡ Quick Start & Local Setup
+
+### Prerequisites
+- **Node.js**: v18.0.0 or higher (v22+ recommended)
+- **npm**: v9.0.0 or higher
+
+### Installation & Execution
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/<your-username>/product-admin-dashboard.git
-cd product-admin-dashboard
+git clone https://github.com/TejasJL/ApexStore-.git
+cd ApexStore-
 
-# 2. Install dependencies
+# 2. Install project dependencies
 npm install
 
-# 3. Start the local development server (runs on port 3000)
+# 3. Start local development server (runs on port 3000)
 npm run dev
 
-# 4. Run codebase verification and production build
+# 4. Verify code quality & production build
 npm run lint
 npm run build
 
@@ -34,107 +80,120 @@ npm run preview
 
 ---
 
-## 📦 Finished Deliverables & Compliance Checklist
+## 📦 Requirements & Compliance Matrix
 
-All assignment specifications and rules are implemented from first principles (zero third-party query, table, or pagination libraries):
-
-- [x] **1. Authentication & Session Management**
-  - [x] Protected routes preventing unauthorized access to product views.
-  - [x] Authentic API login via `POST https://dummyjson.com/auth/login`.
-  - [x] Visual error banners displaying DummyJSON validation failures for incorrect credentials.
-  - [x] Dedicated session purge and logout button in top navigation bar.
-  - [x] Automatic session recovery and state hydration on refresh.
-
-- [x] **2. Centralized Networking & Axios Interceptors**
-  - [x] Single shared Axios configuration file (`src/api/axios.js`).
-  - [x] Request interceptor automatically attaching `Authorization: Bearer <token>` to every outgoing request.
-  - [x] Response interceptor standardizing error codes, broadcasting session expiration on `401 Unauthorized`, and handling network timeouts.
-  - [x] Request cancellation handling (`axios.isCancel`) filtering out aborted requests from user error toasts.
-
-- [x] **3. Product Presentation & Responsive Layout**
-  - [x] Desktop high-density data table displaying Image, Title, Category, Price, Rating, and Stock.
-  - [x] Mobile card grid layout automatically activated on smaller screens (`sm:hidden`).
-  - [x] Zero-dependency spotlight carousel highlighting low-stock items and top-rated products.
-
-- [x] **4. Custom First-Principles Pagination**
-  - [x] Real API pagination using `limit` and `skip` query parameters (`skip = (page - 1) * limit`).
-  - [x] Dynamic page numbers with ellipsis windowing (e.g. `1 ... 4 5 6 ... 20`).
-  - [x] Previous and Next navigation buttons with boundary disabled states.
-  - [x] Page size selector supporting `10`, `20`, and `50` rows per page.
-  - [x] Exact specification text label: e.g. **`Showing 21–40 of 194`**.
-
-- [x] **5. Debounced Search & Query Synchronization**
-  - [x] Search endpoint integration (`/products/search?q=`).
-  - [x] Custom `useDebounce` hook (350ms delay) preventing premature API calls while typing.
-  - [x] Automatic pagination reset to Page 1 on any search query modification.
-  - [x] Quick keyboard shortcut (`/` key) to focus search input.
-
-- [x] **6. Category Filtering & Multi-Column Sorting**
-  - [x] Dynamic category fetching from `/products/categories`.
-  - [x] Column sorting by `price`, `rating`, or `title` with ascending/descending toggle.
-
-- [x] **7. Full Product Details View (`/products/[id]`)**
-  - [x] Dedicated route view with interactive image gallery, specifications, price breakdown, and customer reviews.
-  - [x] Dedicated "Product Not Found" (404) screen for invalid or deleted IDs with a 1-click return to catalog.
-
-- [x] **8. Product Management (Add, Edit & Delete)**
-  - [x] Add/Edit modal with multi-field client-side validation (Title length ≥ 3, Price > 0, Stock ≥ 0, Category required).
-  - [x] Accessible confirmation dialog (`ConfirmModal.jsx`) before deleting any product.
-  - [x] Protection against multiple rapid clicks on Save and Login buttons.
-
-- [x] **9. Complete State Feedback**
-  - [x] Skeleton loaders for tables and cards during data fetching.
-  - [x] Empty state screen with recovery actions when no items match filters.
-  - [x] Error state screen with a 1-click `Retry` button on network failure.
-
-- [x] **10. Defensive URL State Management**
-  - [x] All parameters (`page`, `limit`, `q`, `category`, `sortBy`, `order`, `delay`) synchronized bidirectionally with browser URL.
-  - [x] Corrupted URL values (e.g. `?page=abc`) safely clamped to defaults without breaking the page.
-  - [x] Out-of-bounds page requests (e.g. `?page=999`) safely handled with clear recovery feedback.
+| Assignment Requirement | Implementation Detail | Status |
+| :--- | :--- | :---: |
+| **Authentication Page** | Validates against `POST /auth/login`. Displays error alert on bad credentials. Blocks unauthenticated access. Includes dedicated Sign Out action. | ✅ Complete |
+| **Product List Display** | Shows Image, Title, Category, Price, Rating, and Stock. Uses high-density table on desktop and responsive cards on mobile. | ✅ Complete |
+| **First-Principles Pagination** | Loads data page-by-page via `limit` and `skip`. Displays page numbers, Prev/Next, page sizes (10, 20, 50), and exact label: `Showing 21–40 of 194`. | ✅ Complete |
+| **Debounced Search Engine** | Integrates `/products/search?q=`. Implements 350ms input debounce. Automatically resets pagination to Page 1 on query changes. | ✅ Complete |
+| **Category Filtering & Sorting** | Fetches categories from `/products/categories`. Supports multi-column sorting by Price, Rating, or Title with asc/desc direction toggle. | ✅ Complete |
+| **Product Details View** | Deep-linked at `/products/:id` with interactive multi-image switcher, full technical specs, and customer reviews. Shows dedicated 404 screen for wrong IDs. | ✅ Complete |
+| **Add, Edit & Delete** | Validated form modal (title ≥ 3 chars, price > 0, stock ≥ 0, category required). Accessible delete confirmation popup dialog. | ✅ Complete |
+| **Complete UI States** | Shimmer skeleton loaders during data fetch, clean empty state when no items match filters, and error state banner with a 1-click `Retry` button. | ✅ Complete |
+| **Shared Axios Setup** | Single central client (`src/api/axios.js`). Injects Bearer token into headers. Handles errors and 401 unauthorization globally. | ✅ Complete |
+| **URL State Synchronization** | Keeps page, search, filter, and sort values in URL search parameters. Supports browser Back/Forward navigation and refresh preservation. | ✅ Complete |
+| **Zero Third-Party Query/Table** | No React Query, SWR, TanStack Table, or pagination libraries. 100% custom-crafted hooks and components. | ✅ Complete |
+| **Clean Architecture** | Zero API calls inside UI code. All endpoints isolated in `src/api/`. Decoupled modular components. | ✅ Complete |
+| **Race Condition Immunity** | Old search results never overwrite new ones under erratic network latency. Built-in `&delay=2000` toggle for live verification. | ✅ Complete |
+| **Wrong URL Values Resilience** | Corrupted parameters like `?page=abc` default safely to 1. `?page=999` displays informative out-of-range feedback with a 1-click Return to Page 1 button. | ✅ Complete |
+| **Rapid Submission Throttling** | Submit and Login buttons are disabled with submission locks during in-flight requests, preventing duplicate API dispatches. | ✅ Complete |
 
 ---
 
-## 🏛️ Technical Solutions to Assignment Challenges
+## 📁 Project Architecture & Directory Layout
 
-### 1. Dual-Shield Race Condition Immunity on Fast Typing
-**Problem**: When a user types rapidly (e.g. typing "p" followed by "phone"), earlier network requests with slower latency could resolve after later requests, overwriting fresh results with stale data.  
-**Solution**: We implemented a two-tier defense mechanism in [`useProducts.js`](file:///c:/Users/Public/Nextgenesis%20Assignment/src/hooks/useProducts.js):
-1. **Network Abort**: An `AbortController` signal is bound to every Axios request. As soon as the search query or filters change, `abortController.abort()` cancels in-flight HTTP requests.
-2. **Monotonic Sequence Counter (`requestIdRef`)**: An incrementing counter tracks the latest issued request ID. When a response resolves, the hook checks `if (currentRequestId !== requestIdRef.current) return;`. Even if the browser network cache delays cancellation, outdated responses are safely discarded.
-3. **Interactive Latency Tester**: A toggle button in the header injects `&delay=2000` into DummyJSON requests to visually verify race condition resilience.
-
-### 2. Category Filter & Search Conflict Resolution
-**Problem**: The DummyJSON API does not support combining `/products/search?q=...` and `/products/category/...` in a single query; the API ignores the category parameter when searching.  
-**Solution**: When both search and category are active, the application queries `/products/search?q=...` for candidate products and executes category filtering on the client. An explanatory `<CategorySearchAlert />` banner transparently informs the user of this hybrid behavior and provides 1-click shortcuts to isolate search or category.
-
-### 3. Add, Edit, and Delete Persistence Overlay
-**Problem**: DummyJSON is a mock API and does not persist changes to its database on `POST`, `PUT`, or `DELETE`.  
-**Solution**: We execute real Axios calls to DummyJSON's mutation endpoints to verify HTTP status codes. On success, [`ProductMutationContext.jsx`](file:///c:/Users/Public/Nextgenesis%20Assignment/src/context/ProductMutationContext.jsx) records the operation into a `sessionStorage` overlay. Newly created products prepend to Page 1, updates reflect immediately in catalog and detail views, and deleted IDs are filtered out dynamically across all pagination and search operations.
-
-### 4. Where AI Assisted in Development
-In accordance with assignment transparency guidelines, AI was utilized as an engineering accelerator in the following areas:
-- **Pagination Boundary Edge Cases**: AI assisted in formalizing the mathematical windowing algorithm for pagination bounds and ellipsis generation (`totalPages`, `skip`, `Math.min(skip + limit, total)`), ensuring zero-based indexing bugs were eliminated.
-- **Race Condition Architectural Design**: AI helped validate the dual-shield pattern combining standard DOM `AbortController` cancellation with a React `useRef` monotonic sequence counter to guarantee out-of-order response rejection.
-- **Accessible UI Scaffolding**: AI accelerated the creation of accessible modal dialogues (Escape key listeners, focus management, backdrop clicks) and responsive Tailwind CSS layout switching between desktop tables and mobile cards.
-- **Edge-Case Brainstorming**: AI assisted in cataloging edge cases such as malformed query strings (`?page=abc`, `?page=999`, negative limits), rapid duplicate submissions, and SPA route reloading on static hosting providers.
+```
+├── public/
+│   └── _redirects                                # Netlify SPA rewrite configuration (/* /index.html 200)
+├── src/
+│   ├── api/
+│   │   ├── axios.js                              # Shared Axios client with Bearer token & error interceptors
+│   │   ├── auth.api.js                           # Authentication API module (POST /auth/login, GET /auth/me)
+│   │   └── products.api.js                       # Products catalog CRUD, search, category & delay endpoints
+│   ├── assets/
+│   │   └── images/                               # Curated sample product imagery
+│   ├── components/
+│   │   ├── auth/
+│   │   │   └── LoginPage.jsx                     # Authentication screen with 1-click credentials autofill
+│   │   ├── common/
+│   │   │   ├── ConfirmModal.jsx                  # Accessible delete confirmation dialog
+│   │   │   ├── EmptyState.jsx                    # No results empty state with reset filter action
+│   │   │   ├── ErrorState.jsx                    # Network error state with 1-click retry button
+│   │   │   ├── ImageWithFallback.jsx             # Resilient image loader with skeleton shimmer & error fallback
+│   │   │   ├── RatingStars.jsx                   # Fractional vector star rating component
+│   │   │   └── SkeletonLoader.jsx                # Table row and card grid shimmer loaders
+│   │   ├── docs/
+│   │   │   └── ArchitectureModal.jsx             # In-app architecture transparency & compliance viewer
+│   │   ├── layout/
+│   │   │   ├── Header.jsx                        # Navigation header, user profile, theme toggle & Sign Out
+│   │   │   └── MainLayout.jsx                    # Application layout wrapper
+│   │   └── products/
+│   │       ├── CatalogStatsBar.jsx               # Inventory KPI metrics bar & 2000ms delay simulator
+│   │       ├── CategorySearchAlert.jsx           # Transparency notice for simultaneous search + category
+│   │       ├── ProductCardGrid.jsx               # Responsive touch-friendly mobile card grid view
+│   │       ├── ProductDetailsPage.jsx            # Deep-linked product detail view (/products/:id) with 404 recovery
+│   │       ├── ProductFiltersBar.jsx             # Search input, category dropdown, sort options & view switcher
+│   │       ├── ProductFormModal.jsx              # Add and Edit modal with live validation & live preview
+│   │       ├── ProductPagination.jsx             # Custom pagination math, rows selector & ellipsis windowing
+│   │       ├── ProductSpotlightCarousel.jsx      # Zero-dependency inventory spotlight carousel
+│   │       └── ProductTable.jsx                  # High-density desktop data table with sort headers
+│   ├── context/
+│   │   ├── AuthContext.jsx                       # Global authentication state, session storage & logout mechanics
+│   │   ├── ProductMutationContext.jsx            # SessionStorage mutation overlay (Add/Edit/Delete persistence)
+│   │   └── ToastContext.jsx                      # Non-blocking alert toast notifications queue
+│   ├── hooks/
+│   │   ├── useDebounce.js                        # 350ms input debounce hook with cleanup
+│   │   ├── useProducts.js                        # Dual-shield race condition engine & catalog data fetcher
+│   │   └── useUrlState.js                        # Bidirectional URL search param synchronization hook
+│   ├── utils/
+│   │   ├── formatters.js                         # Currency, category name, date, and stock health formatters
+│   │   ├── indianCatalog.js                      # Currency conversion helpers & preset templates
+│   │   └── storage.js                            # Safe localStorage wrapper with try/catch guards
+│   ├── App.jsx                                   # Root application coordinator & route renderer
+│   ├── index.css                                 # Tailwind CSS v4 styling & dark theme definitions
+│   └── main.jsx                                  # React 19 application mount point
+├── .env.example                                  # Environment variable configuration template
+├── .gitignore                                    # Production git exclusion patterns
+├── index.html                                    # Application HTML entry point & typography preconnections
+├── package.json                                  # Project manifest, clean dependencies & build scripts
+├── tsconfig.json                                 # TypeScript compiler configuration & path aliases
+├── vercel.json                                   # Vercel SPA route rewrite rules
+└── vite.config.js                                # Vite bundler & Tailwind CSS v4 plugin pipeline
+```
 
 ---
 
-## 🚀 Deployment (Vercel & Netlify)
+## 🚀 Deployment Instructions
 
-This repository includes pre-configured SPA routing rules:
-- **Vercel**: Configured via [`vercel.json`](file:///c:/Users/Public/Nextgenesis%20Assignment/vercel.json) rewrite rules to route all subpaths (e.g. `/products/1`) to `/index.html`.
-- **Netlify**: Configured via [`public/_redirects`](file:///c:/Users/Public/Nextgenesis%20Assignment/public/_redirects) (`/* /index.html 200`).
+### Vercel Deployment
+1. Import the repository into [Vercel](https://vercel.com).
+2. Framework Preset: **Vite** (automatically detected).
+3. Root Directory: `./`
+4. Build Command: `npm run build`
+5. Output Directory: `dist`
+6. Environment Variables:
+   - `VITE_API_BASE_URL`: `https://dummyjson.com`
+7. Click **Deploy**.
 
-To deploy:
-1. Import this repository into Vercel or Netlify.
-2. Framework Preset: **Vite**.
-3. Build Command: `npm run build`.
-4. Output Directory: `dist`.
+*Note: The included `vercel.json` ensures that deep-linked routes such as `/products/1` will reload cleanly without returning a 404.*
+
+### Netlify Deployment
+1. Import the repository into [Netlify](https://www.netlify.com).
+2. Build command: `npm run build`
+3. Publish directory: `dist`
+4. The included `public/_redirects` file (`/* /index.html 200`) ensures client-side routing on all routes.
 
 ---
 
-## 🛠️ Verification & Quality Gates
+## 🛠️ Verification & Quality Assurance
 
-- **Linter**: `npm run lint` — **0 errors, 0 warnings**.
-- **Production Build**: `npm run build` — **Built in < 900ms**.
+- **Code Quality**: `npm run lint` — **0 errors, 0 warnings**.
+- **Production Build**: `npm run build` — **Built in < 1 second**.
+- **Clean Workspace**: Free of extraneous dependencies, mock data leaks, temporary comments, or unneeded tooling scaffolding.
+
+---
+
+## 📄 License
+This project is open-source and available under the [MIT License](LICENSE).

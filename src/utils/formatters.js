@@ -8,7 +8,7 @@ import { formatIndianRupee, formatIndianCompact, toIndianPrice } from './indianC
 export { formatIndianCompact, toIndianPrice };
 
 /**
- * Formats a numeric value into Indian Rupee currency format (₹XX,XXX)
+ * Formats a numeric value into Indian Rupee currency format (e.g. ₹1,499)
  * Example: 1499 -> "₹1,499", 125000 -> "₹1,25,000"
  * @param {number} value
  * @returns {string}
