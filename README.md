@@ -15,7 +15,7 @@ Designed and engineered with strict adherence to zero-third-party query/table/pa
 ## 🔗 Submission Links
 
 - **GitHub Repository**: [https://github.com/TejasJL/ApexStore-.git](https://github.com/TejasJL/ApexStore-.git)
-- **Live Demo Deployment**: [apexstore-phi.vercel.app](apexstore-phi.vercel.app)
+- **Live Demo Deployment**: [Live Link](https://apexstore-phi.vercel.app/)
 - **API Documentation**: [DummyJSON Docs](https://dummyjson.com/docs)
 
 ---
